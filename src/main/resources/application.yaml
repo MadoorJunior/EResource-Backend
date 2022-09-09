@@ -1,0 +1,20 @@
+# 运行端口
+server:
+  port: 9000
+
+# 配置文件
+spring:
+  profiles:
+    active: dev
+#    active: prod
+
+# 整合mybatis
+mybatis:
+  type-aliases-package: cn.edu.njnu.pojo
+  mapper-locations: classpath:mybatis/mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+neo4j:
+  username: neo4j
+  password: 123456

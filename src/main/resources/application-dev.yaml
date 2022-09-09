@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/resources_class?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: chengehang99
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  redis:
+    password: fzsj@GIS
+    database: 4
+    host: 202.102.89.244
+# 跨域
+registry:
+  allowedOrigins: http://127.0.0.1:8080
+
+neo4j:
+  url: bolt://202.102.89.244:7687
+
+file:
+  root: E:\\TestResource
+logging:
+  level:
+    web: debug
+    cn.edu.njnu: debug
