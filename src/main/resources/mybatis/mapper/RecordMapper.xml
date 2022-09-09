@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.njnu.mapper.RecordMapper">
+    <!-- 插入一条知识点浏览记录 -->
+    <insert id="addEntityRecord">
+        insert into t_browse_record (user_id, browse_date, entity_name, browser, OS, ip_address) values(#{userID}, #{browseDate}, #{entityName}, #{browser}, #{OS}, #{ipAddress})
+    </insert>
+    <!-- 插入一条知识点浏览记录 -->
+    <insert id="addResourceRecord">
+        insert into t_browse_record (user_id, browse_date, resource_id, browser, OS, ip_address) values(#{userID}, #{browseDate}, #{resourceID}, #{browser}, #{OS}, #{ipAddress})
+    </insert>
+    <!-- 查询用户浏览记录 -->
+    <select id="record" resultType="map">
+        select resource_id, entity_name, browse_date from t_browse_record where user_id = #{userID} order by browse_date desc limit 10
+    </select>
+    <!-- 查询用户资源浏览记录 -->
+    <select id="resourceRecord" resultType="map">
+        select resource_id, browse_date from t_browse_record where user_id = #{userID} and resource_id is not null order by browse_date desc limit 10
+    </select>
+</mapper>

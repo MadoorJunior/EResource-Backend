@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.njnu.mapper.UserMapper">
+    <select id="queryUserByName" resultType="user">
+        select user_id, username, user_email, user_type, user_password, salt from t_user where username = #{username};
+    </select>
+    <select id="queryUserByNameNP" resultType="user">
+        select user_id, username, user_email, user_type, avatar from t_user where username = #{username};
+    </select>
+    <select id="queryUserByEmail" resultType="user">
+        select user_id, username, user_email, user_type, user_password, salt from t_user where user_email = #{userEmail};
+    </select>
+    <select id="queryUserByID" resultType="user">
+        select user_id, username, user_email, user_type, user_password, salt, period from t_user where user_id = #{user_id};
+    </select>
+    <insert id="addUser" parameterType="user">
+        insert into t_user (username, user_email, user_type, user_password, salt, period, grade, avatar, school) values (#{username}, #{userEmail}, #{userType}, #{userPassword}, #{salt}, #{period}, #{grade}, #{avatar}, #{school});
+    </insert>
+    <update id="updateUser" parameterType="user">
+        update t_user
+        <trim prefix="set" suffixOverrides=",">
+            <if test="userEmail!=null and userEmail!=''">user_email = #{userEmail},</if>
+            <if test="userPassword!=null and userPassword!=''">user_password = #{userPassword},</if>
+        </trim>
+        where username = #{username};
+    </update>
+    <!-- 获取用户ID -->
+    <select id="queryUserID" resultType="HashMap">
+        SELECT user_id FROM t_user
+    </select>
+    <!-- 获取资源浏览记录 -->
+    <select id="browseRecord" resultType="HashMap">
+        SELECT DISTINCT resource_id, browse_date  FROM t_browse_record where user_id = #{user_id} AND resource_id IS NOT NULL ORDER BY browse_date desc limit 20
+    </select>
+    <!-- 获取知识点浏览记录 -->
+    <select id="entityRecord" resultType="HashMap">
+        SELECT entity_name FROM t_browse_record WHERE user_id = #{userId} AND entity_name IS NOT NULL GROUP BY entity_name LIMIT 20
+    </select>
+    <update id="updateRelated">
+        update t_user set related_user=#{related_user} where user_id = #{user_id}
+    </update>
+
+    <select id="queryRelatedUser" resultType="string">
+        select related_user from t_user where user_id = #{user_id}
+    </select>
+
+    <select id="getByID">
+        MATCH
+            (n:user)
+        where
+            n.id = 21
+        RETURN
+            n
+    </select>
+    <!-- 获取浏览过知识点的用户id -->
+    <select id="browseUserID" resultType="HashMap">
+        SELECT DISTINCT user_id FROM t_browse_record
+    </select>
+</mapper>

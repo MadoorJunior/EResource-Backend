@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.njnu.mapper.FavoriteMapper">
+    <select id="folder" resultType="map">
+        SELECT `id`, `name`, introduction FROM t_folder WHERE username = #{username} order by `date` desc
+    </select>
+    <select id="collection" resultType="resource">
+        SELECT t_collection.id as collectionId, t_resource.`id`, resource_name, file_type, `date`  FROM t_collection INNER JOIN t_resource WHERE t_collection.`resource_id` = t_resource.`id` and folder_id = #{folderID} order by `date` desc
+    </select>
+    <select id="collectionStr" resultType="map">
+        SELECT id as collectionId, content FROM t_collection WHERE folder_id = #{folderID} and content is not null order by `date` desc
+    </select>
+    <select id="goal" resultType="map">
+        SELECT id as collectionId, goal FROM t_collection WHERE folder_id = #{folderID} and goal is not null order by `date` desc
+    </select>
+    <select id="key" resultType="map">
+        SELECT id as collectionId, `key` FROM t_collection WHERE folder_id = #{folderID} and `key` is not null order by `date` desc
+    </select>
+    <!-- 根据资源查id -->
+    <select id="queryCurrent" resultType="map">
+        select t_folder.`id` FROM t_folder INNER JOIN t_collection WHERE t_folder.`id` = t_collection.`folder_id` and username = #{username} and
+        <trim suffixOverrides="and">
+            <if test="resourceID!=null">resource_id = #{resourceID} and </if>
+            <if test="content!=null">content = #{content} and </if>
+            <if test="goal!=null">goal = #{goal} and </if>
+            <if test="key!=null">key = #{key} and </if>
+        </trim>
+    </select>
+    <insert id="createFolder">
+        insert into t_folder set id = #{id}, `name` = #{name}, introduction = #{introduction}, username = #{username}, `date` =#{date}
+    </insert>
+    <update id="updateFolder">
+        update t_folder set `name` = #{name}, introduction = #{introduction} where id = #{id}
+    </update>
+    <select id="queryFolder" resultType="folder">
+        SELECT `id`, `name`, introduction, username, `date` FROM t_folder WHERE `id` = #{id}
+    </select>
+    <insert id="putInFolder">
+        insert into t_collection set resource_id = #{resourceID}, folder_id = #{folderID}, `date` = #{date}
+    </insert>
+    <insert id="putKey">
+        insert into t_collection set `key` = #{key}, folder_id = #{folderID}, `date` = #{date}
+    </insert>
+    <insert id="putGoal">
+        insert into t_collection set goal = #{goal}, folder_id = #{folderID}, `date` = #{date}
+    </insert>
+    <select id="queryCollection" resultType="map">
+        SELECT `id`, resource_id, folder_id, `date` FROM t_collection WHERE resource_id = #{resourceID} and folder_id = #{folderID}
+    </select>
+    <insert id="putInFolderStr">
+        insert into t_collection set content = #{content}, folder_id = #{folderID}, `date` = #{date}
+    </insert>
+    <select id="queryCollectionStr" resultType="map">
+        SELECT `id`, content, folder_id, `date` FROM t_collection WHERE content = #{content} and folder_id = #{folderID}
+    </select>
+    <select id="number" resultType="int">
+        select count(id) from t_collection where folder_id = #{folderID}
+    </select>
+
+    <delete id="deleteFolder">
+        delete from t_folder where id = #{folderID}
+    </delete>
+    <delete id="deleteResource">
+        delete from t_collection where folder_id = #{folderID}
+    </delete>
+    <!-- 删资源 -->
+    <delete id="delFolderResource">
+        delete from t_collection where folder_id = #{folderID} and resource_id = #{resourceID}
+    </delete>
+    <delete id="delFolderContent">
+        delete from t_collection where folder_id = #{folderID} and content = #{content}
+    </delete>
+    <delete id="delFolderGoal">
+        delete from t_collection where folder_id = #{folderID} and goal = #{goal}
+    </delete>
+    <delete id="delFolderKey">
+        delete from t_collection where folder_id = #{folderID} and `key` = #{key}
+    </delete>
+    <delete id="delMulti">
+        delete from t_collection
+        where folder_id = #{folderID} and id in
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </delete>
+    <!-- 判断是否已添加 -->
+    <select id="yiyou" resultType="map">
+        select t_folder.`id` FROM t_folder INNER JOIN t_collection WHERE t_folder.`id` = t_collection.`folder_id` and username = #{username} and t_folder.`id` = #{folderID} and
+        <trim suffixOverrides="and">
+            <if test="resourceID!=null">resource_id = #{resourceID} and </if>
+            <if test="content!=null">content = #{content} and </if>
+            <if test="goal!=null">goal = #{goal} and </if>
+            <if test="key!=null">key = #{key} and </if>
+        </trim>
+    </select>
+</mapper>

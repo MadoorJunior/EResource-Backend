@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.njnu.mapper.ResourceMapper">
+    <!-- 根据ID查资源 -->
+    <select id="queryResourceByID" resultType="resource" >
+         select id, resource_name, download, collection, browse, `period`, grade, subject, updateTime, `table`, tableResourceID, resource_type, rate, file_type from t_resource where id = #{id}
+    </select>
+    <!-- 根据IDList查资源 -->
+    <select id="queryResourceByIDList" resultType="resource" >
+        select
+        id, resource_name, download, collection, browse, `period`, grade, subject, updateTime, `table`, tableResourceID, resource_type, rate, file_type
+        from t_resource
+        where id in
+        <foreach collection="IDList" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        <if test="type != 0">and resource_type =#{type}</if>
+        <if test="sort == 1">order by browse desc</if>
+        <if test="sort == 2">order by updateTime desc</if>
+    </select>
+    <!-- 根据ID查资源 -->
+    <select id="queryResourceByContent" resultType="resource" >
+        select id, resource_name, download, collection, browse, `period`, grade, subject, updateTime, `table`, tableResourceID, resource_type, rate, file_type
+        from t_resource
+        <where>
+            <trim suffixOverrides="and">
+                <if test="content!=null">MATCH(content) AGAINST(concat('*',#{content},'*') IN BOOLEAN MODE) and </if>
+                <if test="type!=0">resource_type =#{type} and </if>
+            </trim>
+        </where>
+        <trim>
+            <if test="sort == 1">order by browse desc</if>
+            <if test="sort == 2">order by updateTime desc</if>
+        </trim>
+    </select>
+    <!-- 根据内容查ID -->
+    <select id="queryResourceIdByContent" resultType="integer">
+        select id
+        from t_resource
+        where resource_name like concat('%',#{content},'%')
+    </select>
+    <!-- 获取资源类型 -->
+    <select id="queryType" resultType="HashMap">
+        select type_id, resource_type from t_resource_type
+    </select>
+    <!-- 通过实体找资源 -->
+    <select id="queryResource" resultType="resource">
+        select id, resource_name, download, collection, `period`, grade, subject, url, view_url, entity, updateTime, resource_type, browse, rate, file_type from t_resource where
+        <trim suffixOverrides="and">
+            <if test="entity!=null">entity like concat('%',#{entity},'%') and </if>
+            <if test="type!=0">resource_type =#{type} and </if>
+        </trim>
+        <trim>
+            <if test="sort == 1">order by browse desc</if>
+            <if test="sort == 2">order by updateTime desc</if>
+        </trim>
+        limit #{start},#{end};
+    </select>
+    <!-- 查教学目标和重难点 -->
+    <select id="queryGoalAndKey" resultType="HashMap">
+        select distinct t_goal, t_key from t_instruction_plan_clips
+    </select>
+    <!-- 更新资源浏览次数 -->
+    <update id="updateBrowse">
+        update t_resource set browse = #{browse} where id = #{resourceID}
+    </update>
+    <!-- 更新资源下载次数 -->
+    <update id="updateDownload">
+        update t_resource set download = download+1 where id = #{resourceID}
+    </update>
+    <!-- 查热门资源 -->
+    <select id="queryHot" resultType="resource">
+        SELECT id, resource_name, download, collection, `period`, grade, browse, `subject`, updateTime, file_type FROM t_resource ORDER BY browse DESC LIMIT 8
+    </select>
+    <select id="queryHot2" resultType="resource">
+        SELECT id, resource_name, download, collection, `period`, grade, browse, `subject`, updateTime, file_type FROM t_resource ORDER BY browse DESC LIMIT 20,40
+    </select>
+    <!-- 查最新资源 -->
+    <select id="queryTime" resultType="resource">
+        select id, resource_name, download, collection, `period`, grade, browse, `subject`, updateTime, file_type from t_resource order by updateTime desc limit 8
+    </select>
+
+    <select id="queryMoreTime" resultType="resource">
+        select id, resource_name, download, collection, `period`, grade, browse, `subject`, updateTime, file_type
+        from t_resource
+        <if test="subject!=0">where `subject` =#{subject}</if>
+        order by updateTime desc
+        limit 20
+    </select>
+    <select id="queryMoreHot" resultType="resource">
+        SELECT id, resource_name, download, collection, `period`, grade, browse, `subject`, updateTime, file_type
+        FROM t_resource
+        <if test="subject!=0">where `subject` =#{subject}</if>
+        order by browse desc
+        limit 20
+    </select>
+
+    <!-- 查文档url -->
+    <select id="queryDocument" resultType="HashMap">
+        select *from t_document where id = #{id}
+    </select>
+    <select id="queryUrl" resultType="String">
+        select url from t_document inner join t_resource where t_resource.tableResourceID = t_document.id and t_resource.id = #{resourceID} and t_resource.`table` = 2
+    </select>
+    <select id="queryVideoUrl" resultType="String">
+        select url from t_video inner join t_resource where t_resource.tableResourceID = t_video.id and t_resource.id = #{resourceID} and t_resource.`table` = 3
+    </select>
+    <!-- 查bilibili -->
+    <select id="queryBvideo" resultType="HashMap">
+        select *from t_bvideo where id = #{id}
+    </select>
+    <!-- 查本地视频 -->
+    <select id="queryVideo" resultType="HashMap">
+        select *from t_video where id = #{id}
+    </select>
+    <select id="resourceRate" resultType="java.lang.Double">
+        SELECT AVG(rate) FROM t_comment where resource_id = #{resourceID};
+    </select>
+    <select id="queryByGrade" resultType="cn.edu.njnu.pojo.Resource">
+        SELECT id, resource_name, download, collection, `period`, grade, browse, `subject`, updateTime, file_type
+        FROM t_resource
+        <where>
+            <trim suffixOverrides="and">
+                <if test="grade!=null">grade like concat('%',#{grade},'%') and </if>
+                <if test="type!=0">resource_type =#{type} and </if>
+            </trim>
+        </where>
+        <trim>
+            <if test="sort == 1">order by browse desc</if>
+            <if test="sort == 2">order by updateTime desc</if>
+        </trim>
+    </select>
+    <select id="queryByGradeSmall" resultType="cn.edu.njnu.pojo.Resource">
+        SELECT id, resource_name, download, collection, `period`, grade, browse, `subject`, updateTime, file_type
+        FROM t_resource
+        <where>
+            <trim suffixOverrides="and">
+                period=2 and
+                <if test="type!=0">resource_type =#{type} and </if>
+                <if test="subject!=0">`subject` =#{subject} and </if>
+            </trim>
+        </where>
+        <trim>
+            <if test="sort == 1">order by browse desc</if>
+            <if test="sort == 2">order by updateTime desc</if>
+        </trim>
+        limit #{page}, #{pages}
+    </select>
+    <select id="queryByGradeMiddle" resultType="cn.edu.njnu.pojo.Resource">
+        SELECT id, resource_name, download, collection, `period`, grade, browse, `subject`, updateTime, file_type
+        FROM t_resource
+        <where>
+            <trim suffixOverrides="and">
+                period=3 and
+                <if test="type!=0">resource_type =#{type} and </if>
+                <if test="subject!=0">`subject` =#{subject} and </if>
+            </trim>
+        </where>
+        <trim>
+            <if test="sort == 1">order by browse desc</if>
+            <if test="sort == 2">order by updateTime desc</if>
+        </trim>
+        limit #{page}, #{pages}
+    </select>
+    <select id="queryByGradeHigh" resultType="cn.edu.njnu.pojo.Resource">
+        SELECT id, resource_name, download, collection, `period`, grade, browse, `subject`, updateTime, file_type
+        FROM t_resource
+        <where>
+            <trim suffixOverrides="and">
+                period=4 and
+                <if test="type!=0">resource_type =#{type} and </if>
+                <if test="subject!=0">`subject` =#{subject} and </if>
+            </trim>
+        </where>
+        <trim>
+            <if test="sort == 1">order by browse desc</if>
+            <if test="sort == 2">order by updateTime desc</if>
+        </trim>
+        limit #{page}, #{pages}
+    </select>
+    <select id="countSmall" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM t_resource
+        <where>
+            <trim suffixOverrides="and">
+                period=2 and
+                <if test="type!=0">resource_type = #{type} and </if>
+                <if test="subject!=0">`subject` =#{subject} and </if>
+            </trim>
+        </where>
+    </select>
+    <select id="countMiddle" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM t_resource
+        <where>
+            <trim suffixOverrides="and">
+                period=3 and
+                <if test="type!=0">resource_type =#{type} and </if>
+                <if test="subject!=0">`subject` =#{subject} and </if>
+            </trim>
+        </where>
+    </select>
+    <select id="countHigh" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM t_resource
+        <where>
+            <trim suffixOverrides="and">
+                period=4 and
+                <if test="type!=0">resource_type =#{type} and </if>
+                <if test="subject!=0">`subject` =#{subject} and </if>
+            </trim>
+        </where>
+    </select>
+    <select id="queryDownload" resultType="cn.edu.njnu.pojo.Resource">
+        select id, resource_name, download, collection, `period`, grade, browse, `subject`, updateTime, file_type
+        from t_resource
+        <if test="subject!=0">where `subject` =#{subject}</if>
+        order by download desc
+        limit 20
+    </select>
+    <select id="queryByPeriodSubject" resultType="cn.edu.njnu.pojo.Resource">
+        SELECT id, resource_name, download, collection, `period`, grade, browse, `subject`, updateTime, file_type
+        FROM t_resource
+        <where>
+            <trim suffixOverrides="and">
+                <if test="period!=0">period = #{period} and </if>
+                <if test="subject!=0">`subject` =#{subject} and </if>
+            </trim>
+        </where>
+        <trim>
+            <if test="sort == 1">order by browse desc</if>
+            <if test="sort == 2">order by updateTime desc</if>
+        </trim>
+        limit #{page}, #{pages}
+    </select>
+    <select id="countPeriodSubject" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM t_resource
+        <where>
+            <trim suffixOverrides="and">
+                <if test="period!=0">period = #{period} and </if>
+                <if test="subject!=0">`subject` =#{subject} and </if>
+            </trim>
+        </where>
+    </select>
+</mapper>
+
+

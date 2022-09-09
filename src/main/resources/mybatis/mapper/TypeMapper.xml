@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.njnu.mapper.TypeMapper">
+    <select id="period" resultType="map">
+        select period_id, period_name from t_period
+    </select>
+    <select id="subject" resultType="map">
+        select subject_id, subject_name from t_subject where `period` like concat('%',#{period},'%')
+    </select>
+    <select id="simpleSubject" resultType="java.util.Map">
+        select subject_id, subject_name
+        from t_subject
+        where subject_id in (13,14,16,17,18,12,20,21)
+    </select>
+</mapper>

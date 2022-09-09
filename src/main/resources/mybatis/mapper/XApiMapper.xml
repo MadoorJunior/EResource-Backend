@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.njnu.mapper.XApiMapper">
+
+    <insert id="addQuery">
+        insert into t_xapi (actor, verb, content, `time`) values (#{userId},1,#{keyword}, #{browseDate});
+    </insert>
+    <insert id="addClickEntity">
+        insert into t_xapi (actor, verb, content, `time`, objectType) values (#{userId},2,#{keyword}, #{browseDate}, 1);
+    </insert>
+    <insert id="addBrowse">
+        insert into t_xapi (actor, verb, object, context, `time`, objectType) values (#{userId}, 3, #{resourceID}, #{from}, #{browseDate}, #{objectType});
+    </insert>
+    <insert id="addFavorite">
+        insert into t_xapi (actor, verb, object, content, objectType, `time`) values (#{userId}, 4, #{resourceID}, #{folderName},#{objectType}, #{browseDate});
+    </insert>
+    <insert id="addDownload">
+        insert into t_xapi (actor, verb, object, objectType, `time`) values (#{userId}, 5, #{resourceID},#{objectType}, #{browseDate});
+    </insert>
+    <insert id="addComment">
+        insert into t_xapi (actor, verb, object, content, objectType, `time`) values (#{userID}, 6, #{resourceID}, #{content}, #{resourceType}, #{browseDate})
+    </insert>
+</mapper>
