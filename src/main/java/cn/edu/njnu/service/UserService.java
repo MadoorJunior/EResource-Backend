@@ -1,5 +1,6 @@
 package cn.edu.njnu.service;
 
+import cn.edu.njnu.dto.UserRegisterDto;
 import cn.edu.njnu.mapper.RecordMapper;
 import cn.edu.njnu.mapper.ResourceMapper;
 import cn.edu.njnu.mapper.UserMapper;
@@ -12,6 +13,7 @@ import org.neo4j.driver.v1.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -74,6 +76,31 @@ public class UserService {
         userMapper.updateUser(user);
     }
 
+    public boolean register(UserRegisterDto user){
+        boolean exist = isExist(user.getUsername(), user.getEmail());
+        if (exist) {
+            return false;
+        }
+
+        HashMap<String, String> securityInfo = generateSaltAndPassword(user.getPassword());
+        User pojoUser = new User();
+        pojoUser.setSalt(securityInfo.get("salt"))
+                .setUsername(user.getUsername())
+                .setUserEmail(user.getEmail())
+                .setUserPassword(securityInfo.get("password"))
+                .setUserType(user.getUserType())
+                .setPeriod(user.getPeriod())
+                .setGrade(user.getGrade())
+                .setAvatar("default-avatar.jpg")
+                .setSchool(user.getSchool());
+        addUser(pojoUser);
+        int userID = userMapper.queryUserByName(pojoUser.getUsername()).getUserId();
+        Session session = driver.session();//已关
+        session.run( "create (n:user { id: {userID} }) return n;",
+                parameters( "userID", userID) );
+        session.close();
+        return true;
+    }
     public boolean register(User user) {
         boolean exist = isExist(user.getUsername(), user.getUserEmail());
         if (exist) {
